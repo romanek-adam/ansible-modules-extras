@@ -53,6 +53,12 @@ options:
       - The priority of the policy.
     required: false
     default: 0
+  apply_to:
+    description:
+      - Which types of objects this policy should apply to.
+    required: false
+    default: all
+    choices: [queues, exchanges, all]
   node:
     description:
       - Erlang node name of the rabbit we wish to configure.
@@ -84,6 +90,7 @@ class RabbitMqPolicy(object):
         self._tags = module.params['tags']
         self._priority = module.params['priority']
         self._node = module.params['node']
+        self._apply_to = module.params['apply_to']
         self._rabbitmqctl = module.get_bin_path('rabbitmqctl', True)
 
     def _exec(self, args, run_in_check_mode=False):
@@ -112,6 +119,9 @@ class RabbitMqPolicy(object):
         args.append(json.dumps(self._tags))
         args.append('--priority')
         args.append(self._priority)
+        if self._apply_to is not None:
+            args.append('--apply-to')
+            args.append(self._apply_to)
         return self._exec(args)
 
     def clear(self):
@@ -125,6 +135,7 @@ def main():
         pattern=dict(required=True),
         tags=dict(type='dict', required=True),
         priority=dict(default='0'),
+        apply_to=dict(choices=['queues', 'exchanges', 'all']),
         node=dict(default='rabbit'),
         state=dict(default='present', choices=['present', 'absent']),
     )
