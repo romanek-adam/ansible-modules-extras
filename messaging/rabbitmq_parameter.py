@@ -18,6 +18,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
+import json
+
 DOCUMENTATION = '''
 ---
 module: rabbitmq_parameter
@@ -126,6 +128,8 @@ def main():
     component = module.params['component']
     name = module.params['name']
     value = module.params['value']
+    if not isinstance(value, str):
+        value = json.dumps(value)
     vhost = module.params['vhost']
     state = module.params['state']
     node = module.params['node']
